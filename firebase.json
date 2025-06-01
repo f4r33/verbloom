@@ -1,1 +1,6 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"verbloom-6adf6","appId":"1:774683309256:android:0887122a9bdbbe70fa61fd","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"verbloom-6adf6","appId":"1:774683309256:ios:b16025582634ee1cfa61fd","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"verbloom-6adf6","appId":"1:774683309256:ios:b16025582634ee1cfa61fd","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"verbloom-6adf6","configurations":{"android":"1:774683309256:android:0887122a9bdbbe70fa61fd","ios":"1:774683309256:ios:b16025582634ee1cfa61fd","macos":"1:774683309256:ios:b16025582634ee1cfa61fd","web":"1:774683309256:web:0c08a8b3b15ae258fa61fd"}}}}}}
+{
+  "firestore": {
+    "indexes": "firestore.indexes.json",
+    "rules": "firestore.rules"
+  }
+}

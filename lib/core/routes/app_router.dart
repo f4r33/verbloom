@@ -8,6 +8,7 @@ import 'package:verbloom/features/challenge/presentation/screens/challenge_scree
 import 'package:verbloom/features/home/presentation/screens/home_screen.dart';
 import 'package:verbloom/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:verbloom/features/profile/presentation/screens/profile_screen.dart';
+import 'package:verbloom/features/rewards/presentation/screens/rewards_screen.dart';
 import 'package:verbloom/features/splash/presentation/screens/splash_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -22,6 +23,7 @@ class AppRouter {
   static const String home = '/home';
   static const String profile = '/profile';
   static const String challenge = '/challenge';
+  static const String rewards = '/rewards';
 
   static GoRouter get router => GoRouter(
         initialLocation: splash,
@@ -75,6 +77,10 @@ class AppRouter {
               GoRoute(
                 path: challenge,
                 builder: (context, state) => const ChallengeScreen(),
+              ),
+              GoRoute(
+                path: rewards,
+                builder: (context, state) => const RewardsScreen(),
               ),
             ],
           ),
@@ -143,7 +149,7 @@ class ScaffoldWithBottomNav extends StatelessWidget {
         context.go('/challenge');
         break;
       case 2:
-        // TODO: Implement rewards screen
+        context.go('/rewards');
         break;
       case 3:
         context.go('/profile');

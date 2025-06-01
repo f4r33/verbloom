@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:verbloom/features/challenge/data/repositories/firestore_challenge_repository.dart';
 import 'package:verbloom/features/challenge/domain/models/challenge_question.dart';
 import 'package:verbloom/features/game/presentation/providers/game_provider.dart';
 
 class ChallengeProvider extends ChangeNotifier {
   final GameProvider _gameProvider;
+  final FirestoreChallengeRepository _repository;
   List<ChallengeQuestion> _questions = [];
   int _currentQuestionIndex = 0;
   int _score = 0;
@@ -11,7 +13,8 @@ class ChallengeProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  ChallengeProvider(this._gameProvider);
+  ChallengeProvider(this._gameProvider)
+      : _repository = FirestoreChallengeRepository();
 
   List<ChallengeQuestion> get questions => _questions;
   int get currentQuestionIndex => _currentQuestionIndex;
@@ -29,40 +32,12 @@ class ChallengeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-      _questions = [
-        ChallengeQuestion(
-          id: '1',
-          question: 'What is the meaning of "ephemeral"?',
-          options: [
-            'Lasting for a very short time',
-            'Extremely large',
-            'Completely empty',
-            'Highly valuable',
-          ],
-          correctAnswer: 'Lasting for a very short time',
-          explanation: 'Ephemeral means lasting for a very short time.',
-        ),
-        ChallengeQuestion(
-          id: '2',
-          question: 'Which word is a synonym for "happy"?',
-          options: [
-            'Joyful',
-            'Sad',
-            'Angry',
-            'Tired',
-          ],
-          correctAnswer: 'Joyful',
-          explanation: 'Joyful is a synonym for happy.',
-        ),
-        // Add more mock questions here
-      ];
+      _questions = await _repository.getDailyChallenge();
       _currentQuestionIndex = 0;
       _score = 0;
       _totalXpEarned = 0;
     } catch (e) {
-      _error = 'Failed to load challenge: $e';
+      _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -86,6 +61,21 @@ class ChallengeProvider extends ChangeNotifier {
   void nextQuestion() {
     if (_currentQuestionIndex < _questions.length - 1) {
       _currentQuestionIndex++;
+      notifyListeners();
+    }
+  }
+
+  Future<void> completeChallenge() async {
+    if (!isComplete) return;
+
+    try {
+      await _repository.completeChallenge(
+        _gameProvider.userId,
+        currentQuestion?.id ?? '',
+      );
+      reset();
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
   }

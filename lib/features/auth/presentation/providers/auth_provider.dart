@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:verbloom/features/auth/domain/services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -35,6 +36,9 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       _error = null;
+      if (_authService.currentUser != null) {
+        await _createUserDocument(_authService.currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
       rethrow;
@@ -54,6 +58,9 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       _error = null;
+      if (_authService.currentUser != null) {
+        await _createUserDocument(_authService.currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
       rethrow;
@@ -67,6 +74,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.signInWithGoogle();
       _error = null;
+      if (_authService.currentUser != null) {
+        await _createUserDocument(_authService.currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
       rethrow;
@@ -80,6 +90,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.signInWithApple();
       _error = null;
+      if (_authService.currentUser != null) {
+        await _createUserDocument(_authService.currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
       rethrow;
@@ -93,6 +106,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.signInAnonymously();
       _error = null;
+      if (_authService.currentUser != null) {
+        await _createUserDocument(_authService.currentUser!);
+      }
     } catch (e) {
       _error = e.toString();
       rethrow;
@@ -111,6 +127,27 @@ class AuthProvider extends ChangeNotifier {
       rethrow;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  Future<void> _createUserDocument(User user) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final userDoc = await userRef.get();
+    if (!userDoc.exists) {
+      await userRef.set({
+        'displayName': user.displayName ?? '',
+        'email': user.email ?? '',
+        'totalXP': 0,
+        'currentLevel': 1,
+        'streak': 0,
+        'highestStreak': 0,
+        'gamesPlayed': 0,
+        'gamesWon': 0,
+        'perfectScores': 0,
+        'lastPlayedDate': null,
+        'achievements': [],
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     }
   }
 

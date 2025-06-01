@@ -11,6 +11,9 @@ import 'package:verbloom/features/game/data/seed_data.dart';
 import 'package:verbloom/features/game/presentation/providers/game_provider.dart';
 import 'package:verbloom/features/settings/presentation/providers/settings_provider.dart';
 import 'package:verbloom/firebase_options.dart';
+import 'package:verbloom/features/rewards/data/repositories/firestore_rewards_repository.dart';
+import 'package:verbloom/features/rewards/domain/repositories/rewards_repository.dart';
+import 'package:verbloom/features/rewards/presentation/providers/rewards_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +55,19 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => SettingsProvider(prefs),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, RewardsProvider>(
+          create: (context) {
+            final authProvider = context.read<AuthProvider>();
+            return RewardsProvider(
+              repository: FirestoreRewardsRepository(),
+              userId: authProvider.user?.uid ?? '',
+            );
+          },
+          update: (context, authProvider, previous) => RewardsProvider(
+            repository: FirestoreRewardsRepository(),
+            userId: authProvider.user?.uid ?? '',
+          ),
         ),
       ],
       child: Builder(
