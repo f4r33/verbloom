@@ -57,7 +57,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       });
     } else {
       // TODO: Navigate to results screen
-      Navigator.of(context).pop();
+      challengeProvider.reset();
     }
   }
 
@@ -111,35 +111,6 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Today\'s Challenge'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Exit Challenge?'),
-                  content: const Text(
-                    'Your progress will be lost. Are you sure you want to exit?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Exit'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [

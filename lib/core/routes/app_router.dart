@@ -72,11 +72,11 @@ class AppRouter {
                 path: profile,
                 builder: (context, state) => const ProfileScreen(),
               ),
+              GoRoute(
+                path: challenge,
+                builder: (context, state) => const ChallengeScreen(),
+              ),
             ],
-          ),
-          GoRoute(
-            path: challenge,
-            builder: (context, state) => const ChallengeScreen(),
           ),
         ],
       );
