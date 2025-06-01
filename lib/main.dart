@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:verbloom/core/routes/app_router.dart';
 import 'package:verbloom/features/auth/domain/services/auth_service.dart';
 import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
-import 'firebase_options.dart';
+import 'package:verbloom/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          routerConfig: AppRouter.getRouter(context),
+          routerConfig: AppRouter.router,
         ),
       ),
     );

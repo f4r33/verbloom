@@ -12,63 +12,50 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(de
 
 class AppRouter {
   static const String initial = '/';
-  static const String splash = '/splash';
+  static const String splash = '/';
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String home = '/home';
 
-  static GoRouter getRouter(BuildContext context) {
-    return GoRouter(
-      navigatorKey: _rootNavigatorKey,
-      initialLocation: splash,
-      debugLogDiagnostics: true,
-      redirect: (context, state) {
-        final authProvider = context.read<AuthProvider>();
-        final isAuthenticated = authProvider.isAuthenticated;
-        final isSplash = state.matchedLocation == splash;
-        final isOnboarding = state.matchedLocation == onboarding;
-        final isAuth = state.matchedLocation == login || state.matchedLocation == signup;
+  static GoRouter get router => GoRouter(
+        initialLocation: splash,
+        redirect: (context, state) {
+          final authProvider = context.read<AuthProvider>();
+          final isAuthenticated = authProvider.isAuthenticated;
+          final isSplash = state.matchedLocation == splash;
 
-        // If we're on the splash screen, let it handle the initial auth check
-        if (isSplash) {
+          if (!isAuthenticated && !isSplash) {
+            return login;
+          }
+
+          if (isAuthenticated && (state.matchedLocation == login || state.matchedLocation == signup)) {
+            return home;
+          }
+
           return null;
-        }
-
-        // If not authenticated and not on auth screens, redirect to login
-        if (!isAuthenticated && !isAuth && !isOnboarding) {
-          return login;
-        }
-
-        // If authenticated and on auth screens, redirect to home
-        if (isAuthenticated && isAuth) {
-          return home;
-        }
-
-        return null;
-      },
-      routes: [
-        GoRoute(
-          path: splash,
-          builder: (context, state) => const SplashScreen(),
-        ),
-        GoRoute(
-          path: onboarding,
-          builder: (context, state) => const OnboardingScreen(),
-        ),
-        GoRoute(
-          path: login,
-          builder: (context, state) => const LoginScreen(),
-        ),
-        GoRoute(
-          path: signup,
-          builder: (context, state) => const SignupScreen(),
-        ),
-        GoRoute(
-          path: home,
-          builder: (context, state) => const HomeScreen(),
-        ),
-      ],
-    );
-  }
+        },
+        routes: [
+          GoRoute(
+            path: splash,
+            builder: (context, state) => const SplashScreen(),
+          ),
+          GoRoute(
+            path: onboarding,
+            builder: (context, state) => const OnboardingScreen(),
+          ),
+          GoRoute(
+            path: login,
+            builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: signup,
+            builder: (context, state) => const SignupScreen(),
+          ),
+          GoRoute(
+            path: home,
+            builder: (context, state) => const HomeScreen(),
+          ),
+        ],
+      );
 } 
