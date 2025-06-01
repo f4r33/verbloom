@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -21,8 +24,7 @@ class AuthService {
         password: password,
       );
     } catch (e) {
-      debugPrint('Error signing in: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
   }
 
@@ -37,30 +39,46 @@ class AuthService {
         password: password,
       );
     } catch (e) {
-      debugPrint('Error signing up: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
   }
 
   // Sign in with Google
   Future<UserCredential> signInWithGoogle() async {
     try {
-      // TODO: Implement Google Sign In
-      throw UnimplementedError('Google Sign In not implemented yet');
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) throw 'Google sign in aborted';
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      return await _auth.signInWithCredential(credential);
     } catch (e) {
-      debugPrint('Error signing in with Google: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
   }
 
   // Sign in with Apple
   Future<UserCredential> signInWithApple() async {
     try {
-      // TODO: Implement Apple Sign In
-      throw UnimplementedError('Apple Sign In not implemented yet');
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      return await _auth.signInWithCredential(oauthCredential);
     } catch (e) {
-      debugPrint('Error signing in with Apple: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
   }
 
@@ -69,18 +87,58 @@ class AuthService {
     try {
       return await _auth.signInAnonymously();
     } catch (e) {
-      debugPrint('Error signing in anonymously: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
   }
 
   // Sign out
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
+      await Future.wait([
+        _auth.signOut(),
+        _googleSignIn.signOut(),
+      ]);
     } catch (e) {
-      debugPrint('Error signing out: $e');
-      rethrow;
+      throw _handleAuthException(e);
     }
+  }
+
+  // Handle Firebase Auth Exceptions
+  String _handleAuthException(dynamic e) {
+    if (e is FirebaseAuthException) {
+      switch (e.code) {
+        case 'user-not-found':
+          return 'No user found with this email.';
+        case 'wrong-password':
+          return 'Wrong password provided.';
+        case 'email-already-in-use':
+          return 'Email is already in use.';
+        case 'invalid-email':
+          return 'Email address is invalid.';
+        case 'weak-password':
+          return 'Password is too weak.';
+        case 'operation-not-allowed':
+          return 'Operation not allowed.';
+        case 'account-exists-with-different-credential':
+          return 'Account exists with different credentials.';
+        case 'invalid-credential':
+          return 'Invalid credentials.';
+        case 'user-disabled':
+          return 'User has been disabled.';
+        case 'user-mismatch':
+          return 'User mismatch.';
+        case 'invalid-verification-code':
+          return 'Invalid verification code.';
+        case 'invalid-verification-id':
+          return 'Invalid verification ID.';
+        case 'quota-exceeded':
+          return 'Quota exceeded.';
+        case 'credential-already-in-use':
+          return 'Credential already in use.';
+        default:
+          return 'An error occurred. Please try again.';
+      }
+    }
+    return e.toString();
   }
 } 

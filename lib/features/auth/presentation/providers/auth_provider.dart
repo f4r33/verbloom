@@ -24,111 +24,103 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      await _authService.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } catch (e) {
-      _error = e.toString();
-      debugPrint('Error signing in: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   Future<void> signUpWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+    _setLoading(true);
     try {
       await _authService.signUpWithEmailAndPassword(
         email: email,
         password: password,
       );
+      _error = null;
     } catch (e) {
       _error = e.toString();
-      debugPrint('Error signing up: $e');
+      rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
+    }
+  }
+
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    _setLoading(true);
+    try {
+      await _authService.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<void> signInWithGoogle() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+    _setLoading(true);
     try {
       await _authService.signInWithGoogle();
+      _error = null;
     } catch (e) {
       _error = e.toString();
-      debugPrint('Error signing in with Google: $e');
+      rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> signInWithApple() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+    _setLoading(true);
     try {
       await _authService.signInWithApple();
+      _error = null;
     } catch (e) {
       _error = e.toString();
-      debugPrint('Error signing in with Apple: $e');
+      rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> signInAnonymously() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+    _setLoading(true);
     try {
       await _authService.signInAnonymously();
+      _error = null;
     } catch (e) {
       _error = e.toString();
-      debugPrint('Error signing in anonymously: $e');
+      rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> signOut() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+    _setLoading(true);
     try {
       await _authService.signOut();
+      _error = null;
     } catch (e) {
       _error = e.toString();
-      debugPrint('Error signing out: $e');
+      rethrow;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _setLoading(false);
     }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 } 

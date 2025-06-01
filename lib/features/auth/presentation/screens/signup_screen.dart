@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
+import 'package:provider/provider.dart';
+import 'package:verbloom/core/routes/app_router.dart';
+import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -29,11 +32,28 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
+  Future<void> _handleSignUp() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement Firebase authentication
-      print('Sign up with email: ${_emailController.text}');
+      try {
+        await context.read<AuthProvider>().signUpWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+        if (mounted) {
+          context.go(AppRouter.home);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      }
     }
+  }
+
+  void _handleLogin() {
+    context.pop();
   }
 
   void _handleGoogleSignUp() {
@@ -53,6 +73,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -197,7 +219,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
-                            onPressed: _handleSignUp,
+                            onPressed: authProvider.isLoading ? null : _handleSignUp,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -206,34 +228,23 @@ class _SignupScreenState extends State<SignupScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              'Sign Up',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
+                            child: authProvider.isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text(
+                                    'Sign Up',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Already have an account?',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                ),
+                          TextButton(
+                            onPressed: _handleLogin,
+                            child: Text(
+                              'Already have an account? Sign In',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  context.go('/login');
-                                },
-                                child: Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),

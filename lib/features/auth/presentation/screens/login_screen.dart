@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
+import 'package:provider/provider.dart';
+import 'package:verbloom/core/routes/app_router.dart';
+import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,30 +27,73 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleEmailPasswordLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Implement Firebase authentication
-      print('Login with email: ${_emailController.text}');
+      try {
+        await context.read<AuthProvider>().signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+        if (mounted) {
+          context.go(AppRouter.home);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      }
     }
   }
 
-  void _handleGoogleLogin() {
-    // TODO: Implement Google Sign-In
-    print('Google login pressed');
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      await context.read<AuthProvider>().signInWithGoogle();
+      if (mounted) {
+        context.go(AppRouter.home);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
   }
 
-  void _handleAppleLogin() {
-    // TODO: Implement Apple Sign-In
-    print('Apple login pressed');
+  Future<void> _handleAppleSignIn() async {
+    try {
+      await context.read<AuthProvider>().signInWithApple();
+      if (mounted) {
+        context.go(AppRouter.home);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
   }
 
-  void _handleGuestLogin() {
-    // TODO: Implement guest login
-    print('Continue as guest');
+  Future<void> _handleAnonymousSignIn() async {
+    try {
+      await context.read<AuthProvider>().signInAnonymously();
+      if (mounted) {
+        context.go(AppRouter.home);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
   }
 
   void _handleSignUp() {
-    context.go('/signup');
+    context.push(AppRouter.signup);
   }
 
   bool get _showAppleSignIn {
@@ -57,6 +103,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final isWeb = Theme.of(context).platform == TargetPlatform.windows ||
+        Theme.of(context).platform == TargetPlatform.linux ||
+        Theme.of(context).platform == TargetPlatform.macOS;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -131,8 +182,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _isPasswordVisible
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -166,7 +217,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: _handleLogin,
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : _handleEmailPasswordLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -175,10 +228,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
+                            child: authProvider.isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text(
+                                    'Sign In',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
                           ),
                           const SizedBox(height: 16),
                           Row(
@@ -226,52 +281,41 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  OutlinedButton.icon(
-                    onPressed: _handleGoogleLogin,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: authProvider.isLoading ? null : _handleGoogleSignIn,
+                    icon: Image.network(
+                      'https://www.google.com/favicon.ico',
+                      height: 24,
                     ),
-                    icon: const Icon(Icons.g_mobiledata, color: Colors.red),
                     label: const Text(
                       'Continue with Google',
                       style: TextStyle(fontSize: 16),
                     ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                   ),
-                  if (_showAppleSignIn) ...[
+                  if (!isWeb) ...[
                     const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      onPressed: _handleAppleLogin,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.apple, color: Colors.black),
+                    ElevatedButton.icon(
+                      onPressed: authProvider.isLoading ? null : _handleAppleSignIn,
+                      icon: const Icon(Icons.apple),
                       label: const Text(
                         'Continue with Apple',
                         style: TextStyle(fontSize: 16),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
                   ],
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: _handleGuestLogin,
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    onPressed: authProvider.isLoading ? null : _handleAnonymousSignIn,
                     child: Text(
                       'Continue as Guest',
                       style: TextStyle(
