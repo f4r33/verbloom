@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:verbloom/core/routes/app_router.dart';
 import 'package:verbloom/features/auth/domain/services/auth_service.dart';
 import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
+import 'package:verbloom/features/challenge/presentation/providers/challenge_provider.dart';
 import 'package:verbloom/features/game/data/repositories/firebase_game_repository.dart';
 import 'package:verbloom/features/game/data/seed_data.dart';
 import 'package:verbloom/features/game/presentation/providers/game_provider.dart';
@@ -38,6 +39,15 @@ void main() async {
           },
           update: (context, authProvider, previous) {
             return GameProvider(gameRepository, authProvider.user?.uid ?? '');
+          },
+        ),
+        ChangeNotifierProxyProvider<GameProvider, ChallengeProvider>(
+          create: (context) {
+            final gameProvider = context.read<GameProvider>();
+            return ChallengeProvider(gameProvider);
+          },
+          update: (context, gameProvider, previous) {
+            return ChallengeProvider(gameProvider);
           },
         ),
         ChangeNotifierProvider(

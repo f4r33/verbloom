@@ -110,4 +110,13 @@ class GameProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  void addXp(int amount) {
+    if (_gameStats != null) {
+      _gameStats = _gameStats!.copyWith(
+        xp: _gameStats!.xp + amount,
+      );
+      notifyListeners();
+    }
+  }
 } 

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
 import 'package:verbloom/features/game/presentation/providers/game_provider.dart';
+import 'package:verbloom/features/game/presentation/widgets/challenge_card.dart';
 import 'package:verbloom/features/game/presentation/widgets/daily_word_card.dart';
 import 'package:verbloom/features/game/presentation/widgets/leaderboard_card.dart';
 import 'package:verbloom/features/game/presentation/widgets/stats_card.dart';
@@ -60,6 +61,8 @@ class HomeScreen extends StatelessWidget {
                 const StatsCard(),
                 const SizedBox(height: 16),
                 const DailyWordCard(),
+                const SizedBox(height: 16),
+                const ChallengeCard(),
                 const SizedBox(height: 16),
                 const LeaderboardCard(),
               ]),
