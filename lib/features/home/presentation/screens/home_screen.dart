@@ -12,6 +12,29 @@ class HomeScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final gameProvider = context.watch<GameProvider>();
 
+    if (authProvider.user == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Please sign in to continue',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  context.go('/login');
+                },
+                child: const Text('Sign In'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Verbloom'),

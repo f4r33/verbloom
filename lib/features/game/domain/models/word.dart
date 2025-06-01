@@ -9,17 +9,23 @@ class Word {
   final String difficulty;
   final bool isSaved;
   final DateTime lastReviewed;
+  final String languageCode;
+  final Map<String, String> translations; // Map of language code to translation
+  final List<String> tags; // For categorization (e.g., 'business', 'travel', 'food')
 
-  const Word({
+  Word({
     required this.id,
     required this.word,
     required this.definition,
     required this.example,
     required this.pronunciation,
+    required this.languageCode,
     this.synonyms = const [],
     this.antonyms = const [],
     this.difficulty = 'medium',
     this.isSaved = false,
+    this.translations = const {},
+    this.tags = const [],
     DateTime? lastReviewed,
   }) : lastReviewed = lastReviewed ?? DateTime.now();
 
@@ -33,6 +39,9 @@ class Word {
     List<String>? antonyms,
     String? difficulty,
     bool? isSaved,
+    String? languageCode,
+    Map<String, String>? translations,
+    List<String>? tags,
     DateTime? lastReviewed,
   }) {
     return Word(
@@ -45,6 +54,9 @@ class Word {
       antonyms: antonyms ?? this.antonyms,
       difficulty: difficulty ?? this.difficulty,
       isSaved: isSaved ?? this.isSaved,
+      languageCode: languageCode ?? this.languageCode,
+      translations: translations ?? this.translations,
+      tags: tags ?? this.tags,
       lastReviewed: lastReviewed ?? this.lastReviewed,
     );
   }

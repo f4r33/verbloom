@@ -24,7 +24,7 @@ class AuthService {
         password: password,
       );
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign in with email and password: $e');
     }
   }
 
@@ -39,7 +39,7 @@ class AuthService {
         password: password,
       );
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign up with email and password: $e');
     }
   }
 
@@ -47,9 +47,12 @@ class AuthService {
   Future<UserCredential> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) throw 'Google sign in aborted';
+      if (googleUser == null) {
+        throw Exception('Google sign in aborted');
+      }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -57,7 +60,7 @@ class AuthService {
 
       return await _auth.signInWithCredential(credential);
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign in with Google: $e');
     }
   }
 
@@ -78,7 +81,7 @@ class AuthService {
 
       return await _auth.signInWithCredential(oauthCredential);
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign in with Apple: $e');
     }
   }
 
@@ -87,7 +90,7 @@ class AuthService {
     try {
       return await _auth.signInAnonymously();
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign in anonymously: $e');
     }
   }
 
@@ -99,7 +102,7 @@ class AuthService {
         _googleSignIn.signOut(),
       ]);
     } catch (e) {
-      throw _handleAuthException(e);
+      throw Exception('Failed to sign out: $e');
     }
   }
 

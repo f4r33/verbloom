@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:verbloom/core/routes/app_router.dart';
 import 'package:verbloom/features/auth/domain/services/auth_service.dart';
 import 'package:verbloom/features/auth/presentation/providers/auth_provider.dart';
+import 'package:verbloom/features/game/data/repositories/firebase_game_repository.dart';
+import 'package:verbloom/features/game/data/seed_data.dart';
+import 'package:verbloom/features/game/presentation/providers/game_provider.dart';
 import 'package:verbloom/firebase_options.dart';
 
 void main() async {
@@ -13,24 +16,27 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Uncomment the following line to seed the database
+  await DatabaseSeeder().seedAll();
   
-  runApp(const MyApp());
-}
+  final authService = AuthService();
+  final gameRepository = FirebaseGameRepository();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
-        Provider<AuthService>(
-          create: (_) => AuthService(),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService),
         ),
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(
-            context.read<AuthService>(),
-          ),
+        ChangeNotifierProxyProvider<AuthProvider, GameProvider>(
+          create: (context) {
+            final authProvider = context.read<AuthProvider>();
+            return GameProvider(gameRepository, authProvider.user?.uid ?? '');
+          },
+          update: (context, authProvider, previous) {
+            return GameProvider(gameRepository, authProvider.user?.uid ?? '');
+          },
         ),
       ],
       child: Builder(
@@ -53,6 +59,6 @@ class MyApp extends StatelessWidget {
           routerConfig: AppRouter.router,
         ),
       ),
-    );
-  }
+    ),
+  );
 }

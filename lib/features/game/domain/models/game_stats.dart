@@ -7,7 +7,7 @@ class GameStats {
   final int totalChallengesCompleted;
   final DateTime lastActiveDate;
 
-  const GameStats({
+  GameStats({
     this.xp = 0,
     this.streak = 0,
     this.weeklyChallengeProgress = 0,
